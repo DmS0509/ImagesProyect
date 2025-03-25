@@ -52,7 +52,13 @@ namespace ImagesProyect.Services
         public bool SaveImage(string fileName, string filePath)
         {
             int nodeId = GetBestStorageNode();
-            if (nodeId == -1) return false; // No hay nodos disponibles
+            Console.WriteLine($"Nodo de almacenamiento seleccionado: {nodeId}");
+            if (nodeId == -1)
+            {
+                Console.WriteLine("No hay nodos de almacenamiento disponibles.");
+                return false;
+            }
+
 
             using (var connection = _dbHelper.GetConnection())
             {

@@ -4,8 +4,8 @@ using ImagesProyect.Models;
 
 namespace ImagesProyect.Controllers
 {
-    [Route("api/images")]
     [ApiController]
+    [Route("api/images")]
     public class ImageController : ControllerBase
     {
 
@@ -29,26 +29,39 @@ namespace ImagesProyect.Controllers
         /// <summary>
         /// Sube una imagen al sistema.
         /// </summary>
-        [HttpPost("upload")]
+        [HttpPost]
         public IActionResult UploadImage([FromForm] IFormFile file)
         {
             if (file == null || file.Length == 0)
                 return BadRequest("Debe proporcionar un archivo válido.");
 
+            string uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads");
+
+            if (!Directory.Exists(uploadsFolder))
+                Directory.CreateDirectory(uploadsFolder);
+
             string fileName = Path.GetFileName(file.FileName);
             string filePath = Path.Combine("wwwroot/uploads", fileName);
 
-            // Guardar físicamente el archivo en el servidor
-            using (var stream = new FileStream(filePath, FileMode.Create))
+            try
             {
-                file.CopyTo(stream);
+                // Guardar físicamente el archivo en el servidor
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    file.CopyTo(stream);
+                }
+                // Guardar la imagen en la base de datos
+                bool success = _imageService.SaveImage(fileName, filePath);
+                if (!success) return StatusCode(500, "No se pudo guardar la imagen.");
+
+                return Ok(new { message = "Imagen subida exitosamente." });
             }
 
-            // Guardar la imagen en la base de datos
-            bool success = _imageService.SaveImage(fileName, filePath);
-            if (!success) return StatusCode(500, "No se pudo guardar la imagen.");
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error al subir la imagen: {ex.Message}");
+            }
 
-            return Ok(new { message = "Imagen subida exitosamente." });
         }
 
         /// <summary>
@@ -61,6 +74,18 @@ namespace ImagesProyect.Controllers
             if (!success) return NotFound("Imagen no encontrada.");
 
             return Ok(new { message = "Imagen eliminada correctamente." });
+        }
+
+        [HttpGet("uploads/{fileName}")]
+        public IActionResult GetImage(string fileName)
+        {
+            var filePath = Path.Combine("wwwroot/uploads", fileName);
+
+            if (!System.IO.File.Exists(filePath))
+                return NotFound("Imagen no encontrada.");
+
+            var fileBytes = System.IO.File.ReadAllBytes(filePath);
+            return File(fileBytes, "image/jpeg"); // Cambia el tipo MIME según sea necesario
         }
     }
 }

@@ -1,6 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using System.IO;
+using System.Net.Http;
+using System.Threading.Tasks;
 using ImagesProyect.Services;
 using ImagesProyect.Models;
+using Microsoft.AspNetCore.Http;
 
 namespace ImagesProyect.Controllers
 {
@@ -9,11 +13,15 @@ namespace ImagesProyect.Controllers
     public class ImageController : ControllerBase
     {
 
+        private readonly StorageNodeService _storageNodeService;
         private readonly ImageService _imageService;
+        private readonly HttpClient _httpClient;
 
-        public ImageController(ImageService imageService)
+        public ImageController(StorageNodeService storageNodeService, ImageService imageService)
         {
+            _storageNodeService = storageNodeService;
             _imageService = imageService;
+            _httpClient = new HttpClient();
         }
 
         /// <summary>
@@ -30,39 +38,44 @@ namespace ImagesProyect.Controllers
         /// Sube una imagen al sistema.
         /// </summary>
         [HttpPost]
-        public IActionResult UploadImage([FromForm] IFormFile file)
+        [HttpPost("upload")]
+        public async Task<IActionResult> UploadImage([FromForm] IFormFile file)
         {
             if (file == null || file.Length == 0)
                 return BadRequest("Debe proporcionar un archivo válido.");
 
-            string uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads");
+            // Obtener el mejor nodo de almacenamiento disponible
+            int bestNodeId = await _storageNodeService.GetBestStorageNodeAsync();
+            if (bestNodeId == -1)
+                return StatusCode(500, "No hay nodos de almacenamiento disponibles.");
 
-            if (!Directory.Exists(uploadsFolder))
-                Directory.CreateDirectory(uploadsFolder);
+            // Obtener la IP del nodo usando el NodeId
+            StorageNode? bestNode = await _storageNodeService.GetNodeByIdAsync(bestNodeId);
+            if (bestNode == null)
+                return StatusCode(500, "No se pudo encontrar la IP del nodo de almacenamiento.");
 
-            string fileName = Path.GetFileName(file.FileName);
-            string filePath = Path.Combine("wwwroot/uploads", fileName);
-
-            try
+            // Enviar la imagen al nodo seleccionado
+            using (var stream = new MemoryStream())
             {
-                // Guardar físicamente el archivo en el servidor
-                using (var stream = new FileStream(filePath, FileMode.Create))
-                {
-                    file.CopyTo(stream);
-                }
-                // Guardar la imagen en la base de datos
-                bool success = _imageService.SaveImage(fileName, filePath);
-                if (!success) return StatusCode(500, "No se pudo guardar la imagen.");
+                await file.CopyToAsync(stream);
+                var content = new MultipartFormDataContent
+        {
+            { new ByteArrayContent(stream.ToArray()), "file", file.FileName }
+        };
 
-                return Ok(new { message = "Imagen subida exitosamente." });
+                HttpResponseMessage response = await _httpClient.PostAsync($"http://{bestNode.IP}/api/storage/upload", content);
+
+                if (!response.IsSuccessStatusCode)
+                    return StatusCode(500, "No se pudo almacenar la imagen en el nodo seleccionado.");
             }
 
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Error al subir la imagen: {ex.Message}");
-            }
+            // Registrar la imagen en la base de datos con el NodeId
+            bool success = _imageService.SaveImage(file.FileName, bestNodeId);
+            if (!success) return StatusCode(500, "No se pudo registrar la imagen en la base de datos.");
 
+            return Ok(new { message = "Imagen subida exitosamente." });
         }
+
 
         /// <summary>
         /// Elimina una imagen por ID.

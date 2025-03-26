@@ -1,0 +1,6 @@
+services:
+  storage-node:
+    image: nginx:latest
+    container_name: storage_node
+    ports:
+      - "8080:80"

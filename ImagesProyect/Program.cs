@@ -14,6 +14,7 @@ builder.Services.AddRazorPages();
 builder.Services.AddControllers();
 builder.Services.AddSingleton<DatabaseHelper>();
 builder.Services.AddScoped<ImageService>(); // Registrar el servicio
+builder.Services.AddScoped<StorageNodeService>();
 
 builder.Services.AddCors(options =>
 {

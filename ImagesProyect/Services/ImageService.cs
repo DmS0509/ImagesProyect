@@ -49,16 +49,9 @@ namespace ImagesProyect.Services
         /// <summary>
         /// Guarda una nueva imagen en el nodo con más espacio disponible.
         /// </summary>
-        public bool SaveImage(string fileName, string filePath)
+        public bool SaveImage(string fileName, int nodeId)
         {
-            int nodeId = GetBestStorageNode();
-            Console.WriteLine($"Nodo de almacenamiento seleccionado: {nodeId}");
-            if (nodeId == -1)
-            {
-                Console.WriteLine("No hay nodos de almacenamiento disponibles.");
-                return false;
-            }
-
+            string filePath = $"http://{GetNodeBaseUrl(nodeId)}/uploads/{fileName}";
 
             using (var connection = _dbHelper.GetConnection())
             {
@@ -73,6 +66,7 @@ namespace ImagesProyect.Services
                 }
             }
         }
+
 
         /// <summary>
         /// Encuentra el nodo de almacenamiento con más espacio disponible.
@@ -105,5 +99,20 @@ namespace ImagesProyect.Services
                 }
             }
         }
+
+        private string? GetNodeBaseUrl(int nodeId)
+        {
+            using (var connection = _dbHelper.GetConnection())
+            {
+                connection.Open();
+                using (var cmd = new MySqlCommand("SELECT BaseUrl FROM StorageNodes WHERE Id = @NodeId", connection))
+                {
+                    cmd.Parameters.AddWithValue("@NodeId", nodeId);
+                    var result = cmd.ExecuteScalar();
+                    return result?.ToString();
+                }
+            }
+        }
+
     }
 }

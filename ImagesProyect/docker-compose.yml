@@ -1,6 +1,10 @@
 services:
-  storage-node:
-    image: nginx:latest
-    container_name: storage_node
+  imagesproyect:
+    build: .
     ports:
-      - "8080:80"
+      - "5000:5000"
+    environment:
+      - ASPNETCORE_URLS=http://+:5000
+      - ASPNETCORE_ENVIRONMENT=Development
+      - DOTNET_SKIP_FIRST_TIME_EXPERIENCE=true
+      - DOTNET_USE_POLLING_FILE_WATCHER=true

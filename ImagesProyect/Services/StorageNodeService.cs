@@ -7,6 +7,7 @@ using System.Linq;
 using ImagesProyect.Models;
 using System.Data;
 using ImagesProyect.Data;
+using System.Threading.Tasks; // Asegura que esta línea esté presente
 
 namespace ImagesProyect.Services
 {
@@ -24,7 +25,8 @@ namespace ImagesProyect.Services
             using var connection = _dbHelper.GetConnection();
             await connection.OpenAsync();
 
-            using var cmd = new MySqlCommand("SELECT Id, IP, AvailableSpace FROM StorageNodes", connection);
+            using var cmd = new MySqlCommand("SELECT Id, BaseUrl, AvailableSpace FROM StorageNodes", connection);
+
             using var reader = await cmd.ExecuteReaderAsync();
 
             var nodes = new List<StorageNode>();
@@ -33,13 +35,14 @@ namespace ImagesProyect.Services
                 nodes.Add(new StorageNode
                 {
                     Id = reader.GetInt32("Id"),
-                    IP = reader.GetString("IP"),
-                    AvailableSpace = reader.GetInt32("AvailableSpace")
+                    BaseUrl = reader.GetString("BaseUrl"), // Cambio de "IP" a "BaseUrl"
+                    AvailableSpace = reader.GetInt64("AvailableSpace") // Cambiado a GetInt64
                 });
             }
 
             return nodes;
         }
+
 
         public async Task<int> GetBestStorageNodeAsync()
         {
@@ -55,7 +58,7 @@ namespace ImagesProyect.Services
             using var connection = _dbHelper.GetConnection();
             await connection.OpenAsync();
 
-            using var cmd = new MySqlCommand("SELECT Id, IP, AvailableSpace FROM StorageNodes WHERE Id = @NodeId", connection);
+            using var cmd = new MySqlCommand("SELECT Id, BaseUrl, AvailableSpace FROM StorageNodes WHERE Id = @NodeId", connection);
             cmd.Parameters.AddWithValue("@NodeId", nodeId);
 
             using var reader = await cmd.ExecuteReaderAsync();
@@ -64,11 +67,12 @@ namespace ImagesProyect.Services
                 return new StorageNode
                 {
                     Id = reader.GetInt32("Id"),
-                    IP = reader.GetString("IP"),
-                    AvailableSpace = reader.GetInt32("AvailableSpace")
+                    BaseUrl = reader.GetString("BaseUrl"), // Cambio de "IP" a "BaseUrl"
+                    AvailableSpace = reader.GetInt64("AvailableSpace") // Cambiado a GetInt64
                 };
             }
             return null;
         }
+
     }
 }

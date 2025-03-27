@@ -13,8 +13,20 @@ builder.WebHost.ConfigureKestrel(options =>
     options.ListenAnyIP(5000);
 });
 
+var corsPolicy = "_myCorsPolicy";
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: corsPolicy,
+        policy =>
+        {
+            policy.AllowAnyOrigin()
+                  .AllowAnyMethod()
+                  .AllowAnyHeader();
+        });
+});
+
 // Add services to the container.
-builder.Services.AddRazorPages();
+//builder.Services.AddRazorPages();
 builder.Services.AddControllers();
 builder.Services.AddSingleton<DatabaseHelper>();
 builder.Services.AddScoped<ImageService>(); // Registrar el servicio
@@ -38,7 +50,9 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.UseHttpsRedirection();
+app.UseCors(corsPolicy);
+
+//app.UseHttpsRedirection();
 
 app.UseRouting();
 
@@ -48,12 +62,18 @@ app.UseAuthorization();
 
 app.UseStaticFiles();
 
-app.MapRazorPages();
+app.UseFileServer();
+
+app.UseFileServer();
+
+//app.MapRazorPages();
 
 app.UseStaticFiles();
 
 app.UseRouting();
 
 app.MapControllers();
+
+app.MapFallbackToFile("index.html");
 
 app.Run();

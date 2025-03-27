@@ -1,0 +1,153 @@
+body {
+    margin: 0;
+    font-family: 'Helvetica', sans-serif;
+    background: url('..//images/fondo.jpg') no-repeat center center fixed;
+    background-size: cover;
+    color: #333;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 50px;
+    background-color: #ffffffd2;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+}
+
+.logo img {
+    width: 40px;
+    margin-right: 10px;
+}
+
+.logo span {
+    font-size: 22px;
+    font-weight: bold;
+}
+
+.logo .bg {
+    color: #b0b7bd;
+}
+
+nav a {
+    margin: 0 15px;
+    text-decoration: none;
+    color: #333;
+    font-weight: 500;
+}
+
+.actions {
+    display: flex;
+    align-items: center;
+}
+
+.actions a {
+    margin-right: 20px;
+    text-decoration: none;
+    color: #333;
+}
+
+.actions button {
+    background-color: #f1f3f5;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+main {
+    display: flex;
+    justify-content: center;    
+    align-items: center;
+    padding: 100px 20px;
+}
+
+.upload-container {
+    background-color: rgba(255, 255, 255, 0.685); 
+    border: 1px solid #ddd;
+    border-radius: 15px;
+    padding: 50px 40px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    text-align: center;
+    max-width: 500px;
+    width: 100%;
+}
+
+
+.upload-container h1 {
+    font-size: 32px;
+    margin-bottom: 30px;
+}
+
+.upload-btn {
+    background-color: #e78096e8;
+    color: #fff;
+    padding: 14px 40px;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    font-size: 18px;
+    margin-bottom: 20px;
+}
+
+.upload-container p {
+    margin: 10px 0;
+    color: #555;
+}
+
+.upload-container a {
+    color: #0078ff;
+    text-decoration: none;
+}
+
+.model-container {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin: 50px auto;
+    flex-wrap: wrap;
+    max-width: 1200px;
+}
+
+.card {
+    background-color: rgba(255, 255, 255, 0.712);
+    border-radius: 15px;
+    padding: 15px;
+    text-align: center;
+    width: 250px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card img {
+    width: 100%;
+    border-radius: 10px;
+}
+
+.card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+}
+
+.card h3 {
+    margin-top: 10px;
+    font-size: 18px;
+    color: #333;
+}
+
+
+.upload-container, .model-container {
+    text-align: center;
+}
+

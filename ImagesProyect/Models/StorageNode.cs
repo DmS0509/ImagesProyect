@@ -12,7 +12,7 @@ namespace ImagesProyect.Models
         public string IP { get; set; } = ""; // Dirección IP del nodo
         public string? Name { get; set; }  // Nombre del nodo
         public string? BaseUrl { get; set; }  // URL base donde está expuesto el nodo
-        public int AvailableSpace { get; set; } // Espacio en KB o MB
+        public long AvailableSpace { get; set; } // Espacio en KB o MB
     }
 
     public class StorageManager

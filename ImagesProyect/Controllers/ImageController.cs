@@ -63,7 +63,25 @@ namespace ImagesProyect.Controllers
             { new ByteArrayContent(stream.ToArray()), "file", file.FileName }
         };
 
-                HttpResponseMessage response = await _httpClient.PostAsync($"http://{bestNode.IP}/api/storage/upload", content);
+                if (string.IsNullOrWhiteSpace(bestNode.BaseUrl) ||
+    (!bestNode.BaseUrl.StartsWith("http://") && !bestNode.BaseUrl.StartsWith("https://")))
+                {
+                    return StatusCode(500, "La URL del nodo de almacenamiento no es válida.");
+                }
+
+                Console.WriteLine($"📡 Intentando conectar a: {bestNode.BaseUrl}");
+
+                if (string.IsNullOrWhiteSpace(bestNode.BaseUrl) ||
+                    (!bestNode.BaseUrl.StartsWith("http://") && !bestNode.BaseUrl.StartsWith("https://")))
+                {
+                    return StatusCode(500, "La URL del nodo de almacenamiento no es válida.");
+                }
+
+                string requestUrl = bestNode.BaseUrl.TrimEnd('/') + "/api/storage/upload";
+                Console.WriteLine($"📡 URL Final: {requestUrl}");
+
+                HttpResponseMessage response = await _httpClient.PostAsync($"http://127.0.0.1:5000/api/storage/upload", content);
+
 
                 if (!response.IsSuccessStatusCode)
                     return StatusCode(500, "No se pudo almacenar la imagen en el nodo seleccionado.");

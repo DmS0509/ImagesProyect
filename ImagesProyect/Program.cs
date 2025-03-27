@@ -1,12 +1,16 @@
 using ImagesProyect.Data;
 using ImagesProyect.Services;
 using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.StaticFiles;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.WebHost.ConfigureKestrel(options =>
 {
-    options.ListenAnyIP(5050);
+    options.ListenAnyIP(5000);
 });
 
 // Add services to the container.
@@ -42,10 +46,9 @@ app.UseCors("AllowAll");
 
 app.UseAuthorization();
 
-app.MapStaticAssets();
+app.UseStaticFiles();
 
-app.MapRazorPages()
-   .WithStaticAssets();
+app.MapRazorPages();
 
 app.UseStaticFiles();
 

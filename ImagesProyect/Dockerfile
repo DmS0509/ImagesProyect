@@ -1,29 +1,32 @@
-# Consulte https://aka.ms/customizecontainer para aprender a personalizar su contenedor de depuración y cómo Visual Studio usa este Dockerfile para compilar sus imágenes para una depuración más rápida.
-
-# Esta fase se usa cuando se ejecuta desde VS en modo rápido (valor predeterminado para la configuración de depuración)
-FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
-USER $APP_UID
+# Imagen base con ASP.NET Core 8.0
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 WORKDIR /app
-EXPOSE 8080
-EXPOSE 8081
+EXPOSE 5000
 
-
-# Esta fase se usa para compilar el proyecto de servicio
-FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+# Imagen con SDK para compilar la app
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["ImagesProyect/ImagesProyect.csproj", "ImagesProyect/"]
-RUN dotnet restore "./ImagesProyect/ImagesProyect.csproj"
-COPY . .
-WORKDIR "/src/ImagesProyect"
-RUN dotnet build "./ImagesProyect.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
-# Esta fase se usa para publicar el proyecto de servicio que se copiará en la fase final.
+# Limpiar la caché de NuGet
+RUN dotnet nuget locals all --clear
+
+# Copiar y restaurar paquetes
+COPY ["ImagesProyect.csproj", "ImagesProyect/"]
+WORKDIR "/src/ImagesProyect"
+RUN dotnet restore "ImagesProyect.csproj"
+
+# Copiar el código restante y compilar
+COPY . .
+RUN dotnet restore
+RUN dotnet build --configuration Release
+
+# Publicación del proyecto
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./ImagesProyect.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "ImagesProyect.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
-# Esta fase se usa en producción o cuando se ejecuta desde VS en modo normal (valor predeterminado cuando no se usa la configuración de depuración)
+# Imagen final para producción
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
